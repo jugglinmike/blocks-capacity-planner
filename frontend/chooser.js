@@ -91,6 +91,26 @@ const makeWindows = (startDate, endDate) => {
 	return elements;
 };
 
+const useSchedule = (startDate, endDate) => {
+	const [items, setItems]= useState([]);
+
+	useCallback(() => {
+		let cancelled = false;
+		getItems()
+			.then((newItems) => {
+				if (cancelled) {
+					return;
+				}
+
+				setItems(newItems);
+			});
+
+		return () => cancelled = true;
+	}, [startDate, endDate]);
+
+	return items;
+};
+
 export default function Chooser({producers, consumers}) {
 	consumers = annotateExtremes(consumers, 'need');
 	producers = annotateExtremes(producers, 'capacity');
