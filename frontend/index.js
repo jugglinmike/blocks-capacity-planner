@@ -8,7 +8,7 @@ import {
 	useSettingsButton,
 } from '@airtable/blocks/ui';
 import {base} from '@airtable/blocks';
-import React, {useState} from 'react';
+import React, {useContext, useState} from 'react';
 
 import Chooser from './chooser';
 import Settings from './settings';
@@ -25,7 +25,64 @@ loadCSSFromString(`
 	.clearfix {display: block}
 `);
 
+const TzContext = React.createContext('utc');
+const TzProvider = (props) => {
+	const [state, setState] = useState('utc');
+	return (
+		<TzContext.Provider value={[state, setState]}>
+			{props.children}
+		</TzContext.Provider>
+	);
+};
+
+function A() {
+	return (
+		<div>
+			<h1>A {Math.random()}</h1>
+
+			<B />
+		</div>
+	);
+}
+
+function B() {
+	return (
+		<div>
+			<h2>B {Math.random()}</h2>
+
+			<C />
+		</div>
+	);
+}
+
+function C() {
+	const [tz] = useContext(TzContext);
+	return (
+		<div>
+			<h3>C {Math.random()}</h3>
+
+			{tz}
+		</div>
+	);
+}
+
+function Toggler() {
+	const [tz, setTz] = useContext(TzContext);
+	return (
+		<button onClick={() => setTz(tz === 'utc' ? 'local' : 'utc')}>
+			Toggle (current: {tz})
+		</button>
+	);
+}
+
 function CapacityPlanner() {
+	return (
+		<TzProvider>
+			<Toggler />
+
+			<A />
+		</TzProvider>
+	);
 	const [isShowingSettings, setIsShowingSettings] = useState(false);
 	const globalConfig = useGlobalConfig();
 	const deliveriesTableId = globalConfig.get('deliveriesTableId');
